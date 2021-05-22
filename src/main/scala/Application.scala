@@ -1,21 +1,21 @@
-import Algebra.{Todo, TodosService}
-import PostExample.{Details, Headline}
-import cats.effect.Sync
-import cats._
-import cats.data.EitherT
-import cats.effect._
-import cats.implicits._
-
-import java.util.UUID
-import cats.effect.Console.implicits._
-import io.circe.Encoder
-import io.circe.generic.JsonCodec
+import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.deriveEncoder
-
 
 object Algebra {
   type GUID = String
   type Storage = Map[GUID, Todo]
+
+  type Details = String
+  case class Headline private(headline: String)
+  object Headline {
+    def apply(str: String): Either[String, Headline] =
+      Either.cond(str.nonEmpty, new Headline(str), "Headline must not be empty")
+
+    implicit val decodeTodo: Decoder[Headline] = Decoder.decodeString.emap(Headline(_))
+    implicit val encodeFoo: Encoder[Headline] = new Encoder[Headline] {
+      final def apply(a: Headline): Json = Json.fromString(a.headline)
+    }
+  }
 
   case class Todo(guid: GUID, title: String, description: Option[Details])
   object Todo {

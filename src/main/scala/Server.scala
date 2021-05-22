@@ -1,34 +1,19 @@
-import Algebra.Todo
+import Algebra.{Details, Headline, Todo}
 import cats.effect._
 import doobie.Transactor
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.fuuid.FUUID
 import io.circe.generic.auto._
-import io.circe.generic.semiauto._
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.dsl.io._
 import org.http4s.server.blaze._
 import org.http4s.implicits._
+import org.http4s.circe._
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.syntax._
 
-object PostExample extends IOApp {
-  import io.circe._
-
-
-  type Details = String
-  case class Headline private(headline: String)
-  object Headline {
-    def apply(str: String): Either[String, Headline] =
-      Either.cond(str.nonEmpty, new Headline(str), "Headline must not be empty")
-
-    implicit val decodeTodo: Decoder[Headline] = Decoder.decodeString.emap(Headline(_))
-    implicit val encodeFoo: Encoder[Headline] = new Encoder[Headline] {
-      final def apply(a: Headline): Json = Json.fromString(a.headline)
-    }
-  }
-
+object Server extends IOApp {
   implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
   val xa = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver",     // driver classname
@@ -41,10 +26,6 @@ object PostExample extends IOApp {
   val service = new DoobieRepository[IO](xa)
 
   case class TodoJson(headline: Headline, details: Option[Details])
-
-  implicit val todoEncoder =  deriveEncoder[Todo]
-
-  import org.http4s.circe._
 
   val jsonApp = HttpRoutes.of[IO] {
     case req @ POST -> Root  => for {
