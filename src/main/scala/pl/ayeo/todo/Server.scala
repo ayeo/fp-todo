@@ -1,15 +1,10 @@
 package pl.ayeo.todo
 
-import cats._
-import cats.syntax._
 import pl.ayeo.todo.Algebra.HigherService
-//import cats.implicits._
-
 import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import Algebra.{Details, Headline, Todo}
-import cats.data.{EitherT, OptionT}
 import doobie.Transactor
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.fuuid.FUUID
