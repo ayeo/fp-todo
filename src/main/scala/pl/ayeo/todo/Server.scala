@@ -2,7 +2,8 @@ package pl.ayeo.todo
 
 import cats._
 import cats.syntax._
-import cats.implicits._
+import pl.ayeo.todo.Algebra.HigherService
+//import cats.implicits._
 
 import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import org.http4s.HttpRoutes
@@ -31,7 +32,8 @@ object Server extends IOApp {
     Blocker.liftExecutionContext(ExecutionContexts.synchronous) // just for testing
   )
 
-  val service = new DoobieRepository[IO](xa)
+  implicit val service = new DoobieRepository[IO](xa)
+  val hs = new HigherService[IO]
 
   case class TodoJson(headline: Headline, details: Option[Details])
 
@@ -54,22 +56,9 @@ object Server extends IOApp {
       response <- Ok(todo.asJson)
     } yield response
     case PUT -> Root / guid / "complete" => {
-      val eitherTodo = service.get(guid).map(o => o match {
-        case None => Left("Task not found")
-        case Some(todo) => Right(todo)
-      })
-
-      val u = for {
-        tt <- EitherT(eitherTodo)
-        rr <- EitherT(tt.completed().pure[IO])
-        uu <- EitherT(service.update(rr))
-      } yield uu
-
-      u.value.flatMap { x =>
-        x match {
+      hs.completeTask(guid).flatMap {
           case Left(error: String) => BadRequest(error)
           case Right(_) => Ok("Task marked as complete")
-        }
       }
     }
     case DELETE -> Root / guid => for {

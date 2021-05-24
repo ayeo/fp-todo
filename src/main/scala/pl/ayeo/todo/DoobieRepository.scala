@@ -32,11 +32,10 @@ class DoobieRepository[F[_]](val xa: Transactor[F])(implicit b: Bracket[F, Throw
     eitherT.value
   }
 
-  override def update(todo: Algebra.Todo): F[Either[Serializable, Todo]] = {
+  override def update(todo: Algebra.Todo): F[Either[String, Todo]] = {
     val eitherT = for {
       r <- updateSQL(todo).run.transact(xa).attemptSql
-      c <-
-        Either.right[Serializable, Todo](todo).pure[F]
+      c <- Either.right[String, Todo](todo).pure[F]
     } yield c
 
 
