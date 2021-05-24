@@ -54,18 +54,13 @@ object Server extends IOApp {
       r2 <- t match {
         case None => NotFound("Task not found")
         case Some(todo) => {
-          val x = todo.completed()
-          x match {
-            case Right(todo) => service.update(todo) 
-            case Left(error: String) => IO(Left(error))
+          todo.completed() match {
+            case Right(todo) => service.update(todo) *> Ok("Task marked as completed")
+            case Left(error: String) => BadRequest(error)
           }
         }
       }
-      r3 <- r2 match {
-        case Right(_) => Ok("Task marked as completed")
-        case Left(error: String) => BadRequest(error)
-      }
-    } yield r3
+    } yield r2
     case DELETE -> Root / guid => for {
       r <- service.remove(guid)
       res <-
