@@ -12,10 +12,11 @@ resolvers += "jitpack".at("https://jitpack.io")
 //cresolvers += "Tabmo Myget Public".at("https://www.myget.org/F/tabmo-public/maven/")
 
 libraryDependencies ++= Seq(
-  "org.tpolecat" %% "doobie-core"     % doobieVersion,
+  "ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime,
+  "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-postgres" % doobieVersion,
-  "org.tpolecat" %% "doobie-specs2"   % doobieVersion,
-  "dev.profunktor" %% "console4cats" %  "0.8.1",
+  "org.tpolecat" %% "doobie-specs2" % doobieVersion,
+  "dev.profunktor" %% "console4cats" % "0.8.1",
   "mysql" % "mysql-connector-java" % "5.1.44",
   "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % Http4sVersion,

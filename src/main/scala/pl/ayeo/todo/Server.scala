@@ -4,6 +4,7 @@ import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import Algebra.{Details, Headline, Todo}
+import cats.data.{EitherT, OptionT}
 import doobie.Transactor
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.fuuid.FUUID
@@ -34,7 +35,7 @@ object Server extends IOApp {
     case req@POST -> Root => for {
       todo <- req.as[TodoJson]
       guid <- FUUID.randomFUUID[IO]
-      resp <- service.add(Todo(guid.toString().slice(0, 5), todo.headline.headline, todo.details))
+      resp <- service.add(Todo(guid.toString().slice(0, 5), false, todo.headline.headline, todo.details))
       x <- resp match {
         case Right(todo) => Ok(todo.guid)
         case Left(error) => BadRequest(error.toString)
@@ -48,6 +49,23 @@ object Server extends IOApp {
       todo <- service.get(guid)
       response <- Ok(todo.asJson)
     } yield response
+    case PUT -> Root / guid / "complete" => for {
+      t <- service.get(guid)
+      r2 <- t match {
+        case None => NotFound("Task not found")
+        case Some(todo) => {
+          val x = todo.completed()
+          x match {
+            case Right(todo) => service.update(todo) 
+            case Left(error: String) => IO(Left(error))
+          }
+        }
+      }
+      r3 <- r2 match {
+        case Right(_) => Ok("Task marked as completed")
+        case Left(error: String) => BadRequest(error)
+      }
+    } yield r3
     case DELETE -> Root / guid => for {
       r <- service.remove(guid)
       res <-

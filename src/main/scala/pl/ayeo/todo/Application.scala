@@ -19,13 +19,18 @@ object Algebra {
     }
   }
 
-  case class Todo(guid: GUID, title: String, description: Option[Details])
+  case class Todo(guid: GUID, done: Boolean, title: String, description: Option[Details]) {
+    def completed(): Either[String, Todo] =
+      if (done) Left("Task is already done")
+      else Right(Todo(guid, true, title, description))
+  }
   object Todo {
     implicit val fooEncoder: Encoder[Todo] = deriveEncoder
   }
 
   trait TodosService[F[_]] {
     def add(todo: Todo): F[Either[Serializable, Todo]]
+    def update(todo: Todo): F[Either[Serializable, Todo]]
     def remove(guid: GUID): F[Option[Todo]]
     def getAll(): F[List[Todo]]
     def get(guid: GUID): F[Option[Todo]]
