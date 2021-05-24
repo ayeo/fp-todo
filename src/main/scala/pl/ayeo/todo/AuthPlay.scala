@@ -1,26 +1,21 @@
+package pl.ayeo.todo
 
-import ExampleAuthHelpers.{Role, User, dummyBackingStore}
-import Server.jsonApp
-import cats.effect.{ExitCode, IO, IOApp, Sync}
-import cats.{Eq, Id, MonadError}
+
 import cats.data.OptionT
-import tsec.authentication._
-import tsec.authorization.{AuthGroup, AuthorizationInfo, SimpleAuthEnum}
-import tsec.common.SecureRandomId
-import cats.effect.IO
-import cats.Id
+import cats.effect.{ExitCode, IO, IOApp, Sync}
+import cats.{Eq, Id}
 import org.http4s.HttpService
 import org.http4s.dsl.io._
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import scodec.bits.ByteVector
+import pl.ayeo.todo.ExampleAuthHelpers.{Role, User, dummyBackingStore}
 import tsec.authentication._
+import tsec.authorization.{AuthGroup, SimpleAuthEnum}
 import tsec.common.SecureRandomId
 import tsec.jws.mac.JWTMac
 import tsec.mac.jca.{HMACSHA256, MacSigningKey}
 
-import scala.concurrent.duration._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

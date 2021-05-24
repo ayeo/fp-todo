@@ -1,9 +1,11 @@
-import Algebra.{GUID, Todo, TodosService}
+package pl.ayeo.todo
+
 import cats.data.EitherT
 import cats.effect.Bracket
 import cats.implicits._
-import doobie.{Transactor, Update0, _}
 import doobie.implicits._
+import doobie.{Transactor, Update0, _}
+import pl.ayeo.todo.Algebra.{GUID, Todo, TodosService}
 
 class DoobieRepository[F[_]](val xa: Transactor[F])(implicit b: Bracket[F, Throwable]) extends TodosService[F] {
   def insertSQL(todo: Todo): Update0 =

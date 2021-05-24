@@ -1,5 +1,7 @@
-import io.circe.{Decoder, Encoder, Json}
+package pl.ayeo.todo
+
 import io.circe.generic.semiauto.deriveEncoder
+import io.circe.{Decoder, Encoder, Json}
 
 object Algebra {
   type GUID = String
@@ -31,8 +33,6 @@ object Algebra {
 }
 
 object Interpreter {
-  import Algebra._
-  import cats.effect.concurrent.Ref
 
 //  class TestTodosService[F[_] : Monad](val cache: Ref[F, Map[GUID, Todo]]) extends TodosService[F] {
 //    override def add(todo: Todo): F[Option[Todo]] =
