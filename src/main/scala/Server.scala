@@ -55,7 +55,6 @@ object Server extends IOApp {
       } yield res
   }.orNotFound
 
-
   override def run(args: List[String]): IO[ExitCode] = {
     val server = BlazeServerBuilder[IO](global).bindHttp(8666).withHttpApp(jsonApp).resource
     server.use(_ => IO.never).as(ExitCode.Success)
