@@ -52,8 +52,8 @@ object Server extends IOApp {
     } yield response
     case PUT -> Root / guid / "complete" => {
       hs.completeTask(guid).flatMap {
-          case Left(error: String) => BadRequest(error)
-          case Right(_) => Ok("Task marked as complete")
+        case Left(error: String) => BadRequest(error)
+        case Right(_) => Ok("Task marked as complete")
       }
     }
     case DELETE -> Root / guid => for {
