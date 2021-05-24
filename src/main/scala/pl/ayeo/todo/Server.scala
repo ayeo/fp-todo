@@ -1,5 +1,9 @@
 package pl.ayeo.todo
 
+import cats._
+import cats.syntax._
+import cats.implicits._
+
 import cats.effect.{Blocker, ExitCode, IO, IOApp}
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -49,18 +53,25 @@ object Server extends IOApp {
       todo <- service.get(guid)
       response <- Ok(todo.asJson)
     } yield response
-    case PUT -> Root / guid / "complete" => for {
-      t <- service.get(guid)
-      r2 <- t match {
-        case None => NotFound("Task not found")
-        case Some(todo) => {
-          todo.completed() match {
-            case Right(todo) => service.update(todo) *> Ok("Task marked as completed")
-            case Left(error: String) => BadRequest(error)
-          }
+    case PUT -> Root / guid / "complete" => {
+      val eitherTodo = service.get(guid).map(o => o match {
+        case None => Left("Task not found")
+        case Some(todo) => Right(todo)
+      })
+
+      val u = for {
+        tt <- EitherT(eitherTodo)
+        rr <- EitherT(tt.completed().pure[IO])
+        uu <- EitherT(service.update(rr))
+      } yield uu
+
+      u.value.flatMap { x =>
+        x match {
+          case Left(error: String) => BadRequest(error)
+          case Right(_) => Ok("Task marked as complete")
         }
       }
-    } yield r2
+    }
     case DELETE -> Root / guid => for {
       r <- service.remove(guid)
       res <-
